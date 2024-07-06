@@ -1,0 +1,8 @@
+# docker file
+docker-compose.yml
+# docker volumes
+es_data/
+postgres_data/
+redis_data/
+
+
