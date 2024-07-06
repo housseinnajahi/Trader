@@ -58,7 +58,7 @@ Ensure you have the following installed on your local machine:
 2. **Create docker compose file:**
 
    ```bash
-   cp docker-compose.yml.override #Update env variables and add your polygon api key
+   cp docker-compose.yml.override docker-compose.yml #Update env variables and add your polygon api key
    
 3. **Build and start the Docker containers:**
 
