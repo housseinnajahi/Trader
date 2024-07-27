@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from ..exceptions.exceptions import TickerNotFoundException
 from ..redis import redis_client
 from ..tickers import models
-from ..tickers.schemas import Ticker
+from ..tickers.schemas import Aggregation, Ticker
 
 
 class TickerGetter:
@@ -83,6 +83,36 @@ class TickerGetter:
             return ticker[0], ticker[1], ticker[2]
         else:
             return None, None, None
+
+    @classmethod
+    def get_ticker_aggregations(
+        cls, ticker: str, start_date: str, end_date: str, db: Session
+    ) -> list[Aggregation]:
+        start_date = validate_date(start_date)
+        end_date = validate_date(end_date)
+        ticker: Ticker = cls.get_ticker_by_symbol(ticker_symbol=ticker, db=db)
+        aggregations: list[Aggregation] = (
+            db.query(models.Aggregation)
+            .filter(
+                and_(
+                    models.Aggregation.ticker_id == ticker.id,
+                    models.Aggregation.timestamp <= end_date,
+                    models.Aggregation.timestamp >= start_date,
+                )
+            )
+            .order_by(models.Aggregation.timestamp)
+            .all()
+        )
+        return aggregations
+
+
+def validate_date(date_str: str) -> int:
+    try:
+        dt = datetime.strptime(date_str, "%Y-%m-%d").date()
+        dt = datetime.combine(dt, datetime.min.time())
+        return int(dt.timestamp())
+    except ValueError:
+        raise ValueError(f"Invalid date format {date_str}. Expected YYYY-MM-DD.")
 
 
 ticker_getter = TickerGetter()

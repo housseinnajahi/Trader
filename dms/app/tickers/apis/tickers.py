@@ -2,13 +2,14 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 from fastapi.openapi.models import Response
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from ...elasticsearch import es_client
 from ...exceptions.exceptions import catch_errors
 from ...postgres import postgres
 from ..models import TICKERS
-from ..schemas import Ticker, TickerCreate, TickerUpdate
+from ..schemas import Aggregation, Ticker, TickerCreate, TickerUpdate
 from ..services import ticker_service
 
 router = APIRouter(prefix="")
@@ -84,3 +85,34 @@ def search_tickers(
     query: str,
 ) -> list[Ticker]:
     return es_client.es_search(query=query, index=TICKERS)
+
+
+@router.get("/{symbol}/aggregations/{start_date}/{end_date}")
+@catch_errors
+def get_ticker_aggregations(
+    symbol: str,
+    start_date: str,
+    end_date: str,
+    db: Session = Depends(postgres.get_db),
+) -> list[Aggregation]:
+    return ticker_service.get_ticker_aggregations(
+        ticker=symbol, start_date=start_date, end_date=end_date, db=db
+    )
+
+
+@router.get("/{symbol}/aggregations/{start_date}/{end_date}/export")
+@catch_errors
+def export_ticker_aggregations(
+    symbol: str,
+    start_date: str,
+    end_date: str,
+    db: Session = Depends(postgres.get_db),
+):
+    csv_content = ticker_service.export_ticker_aggregations(
+        ticker=symbol, start_date=start_date, end_date=end_date, db=db
+    )
+    response = StreamingResponse(csv_content, media_type="text/csv")
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename=aggregations_of_{symbol}_from_{start_date}_to_{end_date}.csv"
+    )
+    return response

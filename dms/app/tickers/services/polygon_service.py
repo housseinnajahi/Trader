@@ -101,7 +101,6 @@ class PolygonClient:
         url: str = (
             f"{self.api_url}v2/aggs/ticker/{params['ticker']}/range/{params['multiplier']}/{params['timespan']}/{params['from_date']}/{params['to_date']}?adjusted=true&sort=asc"
         )
-        print(url)
         try:
             response = requests.get(url, headers=self.headers)
             response.raise_for_status()
