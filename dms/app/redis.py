@@ -44,5 +44,19 @@ class RedisClient:
         computed_aggregations_str = json.dumps(computed_aggregations)
         self.redis_conn.set(key, computed_aggregations_str)
 
+    def publish_message(self, data: dict, channel: str = "GENERATE_PREDICTION"):
+        message = json.dumps(data)
+        self.redis_conn.publish(channel, message)
+        return {"status": f"Message published to generate prediction for {data['ticker']}"}
+
 
 redis_client = RedisClient()
+
+
+def redis_subscriber(channel: str = "GENERATE_PREDICTION"):
+    pubsub = redis_client.redis_conn.pubsub()
+    pubsub.subscribe(channel)
+    for message in pubsub.listen():
+        if message["type"] == "message":
+            data = json.loads(message["data"])
+            print(f"Received message: {data}")

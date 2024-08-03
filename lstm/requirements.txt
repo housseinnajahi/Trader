@@ -1,0 +1,14 @@
+asyncpg
+fastapi
+requests
+uvicorn
+black
+flake8
+isort
+redis
+pandas
+numpy
+pydantic
+pydantic_settings
+tensorflow
+scikit-learn

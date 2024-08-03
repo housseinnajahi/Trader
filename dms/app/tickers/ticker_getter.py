@@ -105,6 +105,19 @@ class TickerGetter:
         )
         return aggregations
 
+    @classmethod
+    def get_ticker_aggregations_for_prediction(
+        cls, ticker: str, db: Session, limit: int = 480
+    ):
+        ticker: Ticker = cls.get_ticker_by_symbol(ticker_symbol=ticker, db=db)
+        aggregations: list[Aggregation] = (
+            db.query(models.Aggregation)
+            .filter(models.Aggregation.ticker_id == ticker.id)
+            .order_by(models.Aggregation.timestamp.desc())
+            .limit(limit)
+        )
+        return aggregations
+
 
 def validate_date(date_str: str) -> int:
     try:

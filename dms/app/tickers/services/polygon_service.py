@@ -157,6 +157,7 @@ class PolygonClient:
             redis_client.set_computed_aggregations(
                 key="computed_aggregations", computed_aggregations=computed_aggregations
             )
+            logger.info(f"Importing data of {params['ticker']} from {params['from_date']} to {params['to_date']}")
             logger.info(json.dumps(output, indent=4))
 
         except requests.exceptions.HTTPError as http_err:

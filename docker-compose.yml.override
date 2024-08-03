@@ -6,6 +6,7 @@ services:
     command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
     volumes:
       - ./dms:/usr/src/app
+      - ./aggregation_files:/aggregation_files
     ports:
       - 8001:8000
     env_file:
@@ -22,6 +23,7 @@ services:
       - REDIS_PORT=6379
       - ELASTICSEARCH_HOST=elasticsearch
       - ELASTICSEARCH_PORT=9200
+      - AGGREGATION_FOLDER=/aggregation_files
     depends_on:
       - postgres
       - redis
@@ -56,3 +58,20 @@ services:
       - ./es_data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
+  lstm:
+    build: ./lstm
+    command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8003
+    volumes:
+      - ./lstm:/usr/src/app
+      - ./aggregation_files:/aggregation_files
+    ports:
+      - 8004:8003
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/usr/src
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - AGGREGATION_FOLDER=/aggregation_files
+    depends_on:
+      - redis

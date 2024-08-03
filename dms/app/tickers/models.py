@@ -55,3 +55,8 @@ class Aggregation(postgres.base):
 
     def __repr__(self):
         return f"<Aggregation(id={self.id}, ticker={self.ticker_id}, timestamp={self.timestamp})>"
+
+    def to_dict(self):
+        return {
+            c.key: getattr(self, c.key) for c in class_mapper(self.__class__).columns
+        }

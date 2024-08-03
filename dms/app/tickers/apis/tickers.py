@@ -116,3 +116,12 @@ def export_ticker_aggregations(
         f"attachment; filename=aggregations_of_{symbol}_from_{start_date}_to_{end_date}.csv"
     )
     return response
+
+
+@router.get("/{symbol}/aggregations/predictions")
+@catch_errors
+def generate_ticker_aggregations_predictions(
+    symbol: str,
+    db: Session = Depends(postgres.get_db),
+) -> dict:
+    return ticker_service.generate_ticker_aggregations_predictions(ticker=symbol, db=db)

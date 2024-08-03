@@ -4,5 +4,4 @@ docker-compose.yml
 es_data/
 postgres_data/
 redis_data/
-
-
+aggregation_files/

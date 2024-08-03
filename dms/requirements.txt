@@ -16,3 +16,5 @@ pydantic_settings
 redis
 fastapi_utilities
 elasticsearch==7.10.0
+pandas
+numpy==1.21.4

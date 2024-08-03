@@ -7,7 +7,12 @@ from .settings.postgres_settings import postgres_settings
 
 class Postgres:
     def __init__(self):
-        self.engine = create_engine(postgres_settings.DATABASE_URL)
+        self.engine = create_engine(
+            postgres_settings.DATABASE_URL,
+            pool_size=10,
+            max_overflow=20,
+            pool_timeout=30
+        )
         self.sessionLocal = sessionmaker(
             autocommit=False, autoflush=False, bind=self.engine
         )

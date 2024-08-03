@@ -1,12 +1,21 @@
 import csv
+import os
+import uuid
 from io import StringIO
 
 from sqlalchemy.orm import Session
 
-from ...tickers.schemas import (Aggregation, AggregationCreate, Ticker,
-                                TickerCreate, TickerUpdate)
+from ...redis import redis_client
+from ...tickers.schemas import (
+    Aggregation,
+    AggregationCreate,
+    Ticker,
+    TickerCreate,
+    TickerUpdate,
+)
 from ..ticker_getter import ticker_getter
 from ..ticker_setter import ticker_setter
+import pandas as pd
 
 
 def get_ticker_by_id(ticker_id: int, db: Session) -> Ticker:
@@ -68,3 +77,14 @@ def aggregations_to_csv(aggregations: list[Aggregation]):
 
     output.seek(0)
     return output
+
+
+def generate_ticker_aggregations_predictions(ticker: str, db: Session):
+    aggregations: list[Aggregation] = (
+        ticker_getter.get_ticker_aggregations_for_prediction(ticker=ticker, db=db)
+    )
+    file_name = f"{uuid.uuid4()}.csv"
+    df = pd.DataFrame([aggregation.to_dict() for aggregation in aggregations])
+    csv_file_path = f"{os.getenv('AGGREGATION_FOLDER')}/{file_name}"
+    df.to_csv(csv_file_path, index=False)
+    return redis_client.publish_message(data={"file_name": file_name, "ticker": ticker})
