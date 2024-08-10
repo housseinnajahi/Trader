@@ -36,13 +36,10 @@ async def shutdown_event():
 @app.on_event("startup")
 @repeat_every(seconds=60)
 async def get_tickers_info_from_polygon():
-    # have already imported all tickers
     polygon_client.get_tickers()
-    print("gett tickers ")
 
 
 @app.on_event("startup")
 @repeat_every(seconds=15)
 async def get_aggregations_from_polygon():
-    print("get agg")
     polygon_client.get_aggregations()

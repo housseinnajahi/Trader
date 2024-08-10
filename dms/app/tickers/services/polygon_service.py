@@ -101,6 +101,15 @@ class PolygonClient:
         url: str = (
             f"{self.api_url}v2/aggs/ticker/{params['ticker']}/range/{params['multiplier']}/{params['timespan']}/{params['from_date']}/{params['to_date']}?adjusted=true&sort=asc"
         )
+        if params["from_date"] == params["to_date"] and params["from_date"].weekday() >= 5:
+            computed_aggregations = redis_client.get_computed_aggregations(
+                key="computed_aggregations"
+            )
+            computed_aggregations[params["ticker"]] = f'{params["to_date"]}'
+            redis_client.set_computed_aggregations(
+                key="computed_aggregations", computed_aggregations=computed_aggregations
+            )
+            return
         try:
             response = requests.get(url, headers=self.headers)
             response.raise_for_status()
